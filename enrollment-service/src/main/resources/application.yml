@@ -1,0 +1,58 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: enrollment-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/enrollment}
+    username: ${DB_USERNAME:partnermesh}
+    password: ${DB_PASSWORD:partnermesh}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      connection-timeout: 5000
+  flyway:
+    enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  mvc:
+    problemdetails:
+      enabled: true
+
+partnermesh:
+  provisioning:
+    base-url: ${PROVISIONING_URL:http://localhost:8081}
+    connect-timeout: 2s
+    request-timeout: 5s
+  outbox:
+    enabled: true
+    poll-interval-ms: 500
+    batch-size: 20
+    lease: 30s
+    max-attempts: 8
+    backoff-base: 500ms
+    backoff-max: 60s
+    backoff-multiplier: 2.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        partnermesh.outbox.dispatch: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s
