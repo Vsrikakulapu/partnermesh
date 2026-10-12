@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Requires a Secret named partnermesh-db with DB_USERNAME and DB_PASSWORD (created per environment).
+resources:
+  - enrollment-service.yaml
+  - provisioning-service.yaml

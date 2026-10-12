@@ -1,0 +1,14 @@
+# Only the public API is exposed; provisioning-service stays cluster-internal.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: enrollment-service
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: {name: enrollment-service, port: {name: http}}

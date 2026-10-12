@@ -1,0 +1,8 @@
+# Azure Database for PostgreSQL - Flexible Server. DATABASE_HOST is substituted at deploy time.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: provisioning-service
+data:
+  DB_HOST: DATABASE_HOST
+  DB_URL: jdbc:postgresql://DATABASE_HOST:5432/provisioning?sslmode=require

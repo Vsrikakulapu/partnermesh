@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: partnermesh
+# The partnermesh-db Secret is created out of band (or synced from Azure Key Vault), never committed.
+# Image names and the database host are set by .github/workflows/deploy-aks.yml.
+resources:
+  - namespace.yaml
+  - ../../base
+  - ingress.yaml
+images:
+  - {name: partnermesh/enrollment-service, newName: REGISTRY/partnermesh/enrollment-service, newTag: latest}
+  - {name: partnermesh/provisioning-service, newName: REGISTRY/partnermesh/provisioning-service, newTag: latest}
+replicas:
+  - {name: enrollment-service, count: 3}
+  - {name: provisioning-service, count: 2}
+patches:
+  - path: database-enrollment.yaml
+  - path: database-provisioning.yaml

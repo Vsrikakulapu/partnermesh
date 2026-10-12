@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: provisioning-service
+  labels: {app.kubernetes.io/name: provisioning-service, app.kubernetes.io/part-of: partnermesh}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels: {app.kubernetes.io/name: provisioning-service}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: provisioning-service, app.kubernetes.io/part-of: partnermesh}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: /actuator/prometheus
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        - name: wait-for-database
+          image: postgres:16-alpine
+          command: ["sh", "-c", "until pg_isready -h \"$DB_HOST\" -p 5432; do echo waiting for database; sleep 2; done"]
+          envFrom:
+            - configMapRef: {name: provisioning-service}
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+      containers:
+        - name: app
+          image: partnermesh/provisioning-service:latest
+          ports:
+            - {name: http, containerPort: 8081}
+          envFrom:
+            - configMapRef: {name: provisioning-service}
+            - secretRef: {name: partnermesh-db}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=75"
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {memory: 768Mi}
+          startupProbe:
+            httpGet: {path: /actuator/health/liveness, port: http}
+            periodSeconds: 5
+            failureThreshold: 36
+          livenessProbe:
+            httpGet: {path: /actuator/health/liveness, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: {path: /actuator/health/readiness, port: http}
+            periodSeconds: 5
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              sleep: {seconds: 5}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: provisioning-service
+  labels: {app.kubernetes.io/name: provisioning-service, app.kubernetes.io/part-of: partnermesh}
+spec:
+  selector: {app.kubernetes.io/name: provisioning-service}
+  ports:
+    - {name: http, port: 8081, targetPort: http}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: provisioning-service
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels: {app.kubernetes.io/name: provisioning-service}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: provisioning-service
+data:
+  DB_HOST: postgres
+  DB_URL: jdbc:postgresql://postgres:5432/provisioning
