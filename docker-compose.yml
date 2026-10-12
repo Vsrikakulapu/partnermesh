@@ -1,0 +1,55 @@
+x-healthcheck: &actuator-health
+  interval: 3s
+  timeout: 3s
+  retries: 40
+  start_period: 10s
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: partnermesh
+      POSTGRES_PASSWORD: partnermesh
+      POSTGRES_DB: enrollment
+    volumes:
+      - ./deploy/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U partnermesh -d provisioning"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  provisioning-service:
+    build:
+      context: .
+      args:
+        SERVICE: provisioning-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/provisioning
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    healthcheck:
+      <<: *actuator-health
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8081 && printf 'GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+
+  enrollment-service:
+    build:
+      context: .
+      args:
+        SERVICE: enrollment-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/enrollment
+      PROVISIONING_URL: http://provisioning-service:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      provisioning-service:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      <<: *actuator-health
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
