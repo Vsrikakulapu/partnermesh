@@ -21,7 +21,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
-        value: 50m
+        value: 25m
   - target: {kind: HorizontalPodAutoscaler, name: enrollment-service}
     patch: |-
       - op: replace
