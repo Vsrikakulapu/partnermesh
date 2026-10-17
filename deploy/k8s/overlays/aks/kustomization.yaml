@@ -11,8 +11,19 @@ images:
   - {name: partnermesh/enrollment-service, newName: REGISTRY/partnermesh/enrollment-service, newTag: latest}
   - {name: partnermesh/provisioning-service, newName: REGISTRY/partnermesh/provisioning-service, newTag: latest}
 replicas:
-  - {name: enrollment-service, count: 2}
+  - {name: enrollment-service, count: 1}
   - {name: provisioning-service, count: 1}
 patches:
   - path: database-enrollment.yaml
   - path: database-provisioning.yaml
+  # Single small node: system pods take most of the CPU, so keep requests low here.
+  - target: {kind: Deployment}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 50m
+  - target: {kind: HorizontalPodAutoscaler, name: enrollment-service}
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
