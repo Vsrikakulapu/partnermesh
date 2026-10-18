@@ -28,7 +28,7 @@ spec:
       initContainers:
         - name: wait-for-database
           image: postgres:16-alpine
-          command: ["sh", "-c", "until pg_isready -h \"$DB_HOST\" -p 5432; do echo waiting for database; sleep 2; done"]
+          command: ["sh", "-c", "until pg_isready -h \"$DB_HOST\" -p 5432 -U partnermesh -d postgres; do echo waiting for database; sleep 2; done"]
           envFrom:
             - configMapRef: {name: enrollment-service}
           securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
