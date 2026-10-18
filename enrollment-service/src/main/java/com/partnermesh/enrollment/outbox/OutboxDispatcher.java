@@ -18,18 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/**
- * Delivers outbox events to the provisioning service.
- *
- * <p>The network call happens <em>outside</em> any database transaction: claim (short transaction),
- * call, then record the outcome (short transaction). Failure handling:
- * <ul>
- *   <li>transient failure &rarr; reschedule with exponential backoff and jitter</li>
- *   <li>attempts exhausted or permanent failure &rarr; dead-letter the event and fail the enrollment</li>
- *   <li>process crash mid-call &rarr; the lease expires and another instance re-claims the event; the
- *       downstream is idempotent on the enrollment id, so the repeated call is harmless</li>
- * </ul>
- */
+/** Delivers outbox events to the provisioning service. */
 @Component
 public class OutboxDispatcher {
 

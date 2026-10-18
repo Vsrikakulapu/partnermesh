@@ -17,13 +17,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 
-/**
- * Runs the real application against PostgreSQL (from {@code DB_URL}, default localhost:5432/enrollment)
- * with the provisioning service replaced by {@link ProvisioningStub}.
- *
- * <p>{@code @DirtiesContext} closes each test class's context afterwards, so a background outbox poller
- * from one class can never consume events that belong to the next.
- */
+/** Runs the app against PostgreSQL with the provisioning service replaced by a stub. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "partnermesh.outbox.poll-interval-ms=50",
         "partnermesh.outbox.lease=2s",

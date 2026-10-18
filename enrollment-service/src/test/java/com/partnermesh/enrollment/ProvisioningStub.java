@@ -15,10 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * In-process stand-in for provisioning-service that honours the same contract (idempotent on
- * enrollmentId) and can be scripted to fail.
- */
+/** Fake provisioning service for tests, idempotent on enrollmentId and scriptable to fail. */
 final class ProvisioningStub implements AutoCloseable {
 
     enum Mode { NORMAL, ALWAYS_UNAVAILABLE, BAD_REQUEST }

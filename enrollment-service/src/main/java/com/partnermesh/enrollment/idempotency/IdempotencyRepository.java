@@ -31,14 +31,7 @@ public class IdempotencyRepository {
                 .optional();
     }
 
-    /**
-     * Claims the key for the current transaction.
-     *
-     * <p>If another transaction holds an uncommitted claim on the same key, PostgreSQL blocks this insert
-     * until that transaction ends; it then reports a conflict (0 rows) and the caller replays the now
-     * committed response. Concurrent duplicates are therefore serialised by the unique index, with no
-     * application-level locking and no window in which both requests do the work.
-     */
+    /** Claims the key. A concurrent insert of the same key waits on the unique index, then sees the conflict. */
     public boolean claim(String key, String requestHash, Instant now) {
         return jdbc.sql("""
                         INSERT INTO idempotency_keys (idempotency_key, request_hash, response_status, response_body, created_at)

@@ -4,14 +4,7 @@ import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 
-/**
- * Exponential backoff with "equal jitter".
- *
- * <p>The ceiling for attempt {@code n} is {@code min(max, base * multiplier^(n-1))}; the actual delay is
- * drawn uniformly from {@code [ceiling/2, ceiling]}. Half the ceiling is guaranteed, so retries never
- * collapse into a tight loop, and the random half spreads retries from many instances so a recovering
- * downstream is not hit by a synchronized wave.
- */
+/** Exponential backoff with "equal jitter". */
 public record BackoffPolicy(Duration base, Duration max, double multiplier) {
 
     public BackoffPolicy {

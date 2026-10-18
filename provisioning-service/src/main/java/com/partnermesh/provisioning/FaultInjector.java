@@ -5,17 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.stereotype.Component;
 
-/**
- * Deliberate failures, so the upstream's retry and recovery paths can be exercised on demand.
- *
- * <ul>
- *   <li>{@code failNext} - reject the next N requests with 503 before doing any work</li>
- *   <li>{@code dropResponseNext} - do the work, commit it, then answer 503 for the next N requests:
- *       the "lost response" case, which only an idempotent consumer survives without duplicates</li>
- *   <li>{@code failureRate} - reject a random fraction of requests</li>
- *   <li>{@code latencyMs} - add latency to every request</li>
- * </ul>
- */
+/** Injects failures on demand so retries and recovery can be tested. */
 @Component
 public class FaultInjector {
 

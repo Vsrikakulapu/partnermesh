@@ -12,11 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
-/**
- * Calls the provisioning service. Every call carries the enrollment id as {@code Idempotency-Key}, so
- * a retry after a lost response (the downstream did the work but the reply never arrived) returns the
- * existing provision instead of creating a second one.
- */
+/** Calls the provisioning service, using the enrollment id as the idempotency key. */
 @Component
 public class ProvisioningClient {
 

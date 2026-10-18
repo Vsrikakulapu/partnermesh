@@ -42,10 +42,7 @@ public class ProvisionController {
         this.duplicates = metrics.counter("partnermesh.provisioning.duplicates");
     }
 
-    /**
-     * Provision an enrollment. Repeating the call for the same enrollment returns the existing provision
-     * (200) instead of creating another one (201).
-     */
+    /** Provision an enrollment. Calling again for the same enrollment returns the existing one. */
     @PostMapping("/api/v1/provisions")
     public ResponseEntity<ProvisionResponse> provision(@Valid @RequestBody ProvisionRequest request) {
         requests.increment();

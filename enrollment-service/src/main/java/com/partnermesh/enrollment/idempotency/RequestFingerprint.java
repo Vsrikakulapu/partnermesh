@@ -6,13 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.Locale;
 
-/**
- * Stable SHA-256 fingerprint of the semantically relevant request fields.
- *
- * <p>Fields are length-prefixed so that ("ab", "c") and ("a", "bc") never collide, and normalised
- * (trimmed; e-mail lower-cased) so that a client retrying the same logical request with cosmetic
- * differences is recognised as a replay rather than as reuse of the key for a different request.
- */
+/** Stable SHA-256 fingerprint of the semantically relevant request fields. */
 public final class RequestFingerprint {
 
     private RequestFingerprint() {

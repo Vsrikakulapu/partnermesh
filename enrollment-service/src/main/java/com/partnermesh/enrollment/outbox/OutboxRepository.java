@@ -39,11 +39,7 @@ public class OutboxRepository {
                 .update();
     }
 
-    /**
-     * Claims due events: pending ones whose retry time has come, and in-flight ones whose lease expired
-     * because the instance that owned them crashed or stalled. {@code FOR UPDATE SKIP LOCKED} lets any
-     * number of replicas poll concurrently without claiming the same event.
-     */
+    /** Claims due events, including ones whose lease expired. SKIP LOCKED lets replicas poll in parallel. */
     @Transactional
     public List<OutboxEvent> claimDue(Instant now, int limit, Duration lease) {
         List<UUID> ids = jdbc.sql("""

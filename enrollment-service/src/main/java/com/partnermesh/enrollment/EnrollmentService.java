@@ -23,14 +23,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Accepts enrollments.
- *
- * <p>One local transaction writes the idempotency record, the enrollment and the outbox event. Either
- * all three commit or none do, so there is never an enrollment without a pending provisioning request,
- * and never a provisioning request for an enrollment that does not exist. The cross-service step
- * (provisioning) happens later, asynchronously, from the outbox.
- */
+/** Saves the idempotency key, enrollment and outbox event in one transaction. */
 @Service
 public class EnrollmentService {
 

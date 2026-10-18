@@ -29,10 +29,7 @@ public class EnrollmentController {
         this.service = service;
     }
 
-    /**
-     * Create an enrollment. Clients must send an {@code Idempotency-Key}; repeating a request with the same
-     * key returns the original response (same status, byte-identical body) instead of enrolling twice.
-     */
+    /** Create an enrollment. Repeating a request with the same key returns the original response. */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> enroll(
             @RequestHeader(name = IDEMPOTENCY_KEY, required = false) String idempotencyKey,
