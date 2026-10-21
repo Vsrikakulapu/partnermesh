@@ -58,5 +58,5 @@ Docker setup, and the same script against a local Kubernetes cluster where the s
 with two replicas, health checks and autoscaling. Both services also export Prometheus metrics
 for request latency, retries and the backlog of pending work.
 
-The repo also has a setup for deploying to Azure Kubernetes Service with a managed PostgreSQL
-database, which deploys from GitHub Actions once Azure credentials are added.
+I also deployed it to Azure Kubernetes Service, with a managed PostgreSQL database for each
+service. The deployment runs from GitHub Actions using the AKS overlay in deploy/k8s.
